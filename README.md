@@ -1,4 +1,15 @@
 # Custom IAM User and Role Project
+Project is implemented together with gemini cli in one afternoon to try out
+agentic coding for real use case. 
+
+Resources choosen are IAM user, role and managed policy, which are free of
+cost and no possible damage (remember to teardown!!!)
+
+The use case is to create a `IAM user` that can only assume a certain `role` with limited
+permissions. Hereafter, this user is intended for use with agentic
+infrastructure development purpose. The constrained role should ideally
+limit any damages should the agent start to hallucinate and do stupid things. 
+So choose your role permission carefully.
 
 ## 1. Overview
 
