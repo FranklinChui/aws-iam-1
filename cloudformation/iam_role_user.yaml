@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  CloudFormation template for creating an IAM User and an IAM Role.
+  The user is granted permission to assume the role.
+
+Parameters:
+  UserName:
+    Type: String
+    Description: The name for the IAM user.
+    Default: 'agent_user'
+  RoleName:
+    Type: String
+    Description: The name for the IAM role.
+    Default: 'task_role'
+  ManagedPolicyArn:
+    Type: String
+    Description: The ARN of the managed policy to attach to the role.
+
+Resources:
+  AgentUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: !Ref UserName
+
+  AssumeRolePolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: 'AssumeRolePolicy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: 'sts:AssumeRole'
+            Resource: !GetAtt TaskRole.Arn
+      Users:
+        - !Ref AgentUser
+
+  TaskRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Ref RoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt AgentUser.Arn
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - !Ref ManagedPolicyArn
+
+  UserAccessKey:
+    Type: 'AWS::IAM::AccessKey'
+    Properties:
+      UserName: !Ref AgentUser
+
+Outputs:
+  UserArn:
+    Description: The ARN of the created IAM user.
+    Value: !GetAtt AgentUser.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-UserArn'
+  RoleArn:
+    Description: The ARN of the created IAM role.
+    Value: !GetAtt TaskRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-RoleArn'
+  AccessKeyId:
+    Description: The access key ID for the IAM user.
+    Value: !Ref UserAccessKey
+  SecretAccessKey:
+    Description: The secret access key for the IAM user.
+    Value: !GetAtt UserAccessKey.SecretAccessKey
